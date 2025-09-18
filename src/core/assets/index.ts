@@ -4,7 +4,7 @@
 import { join } from 'path';
 import { newConsole } from '../base/console';
 import { assetDBManager } from './manager/asset-db';
-import { assetManager } from './manager';
+import { assetManager } from './manager/asset';
 import { getCurrentLocalTime } from './utils';
 import assetConfig, { AssetDBConfig } from './asset-config';
 
@@ -24,3 +24,6 @@ export async function startupAssetDB(config: Partial<AssetDBConfig> = {}) {
         throw error;
     }
 }
+
+
+// TODO 对外接口暴露
