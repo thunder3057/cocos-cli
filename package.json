@@ -2,7 +2,7 @@
     "name": "@base/cocos-cli",
     "version": "1.0.0",
     "description": "Cocos Creator CLI tool for project management and building",
-    "main": "index.js",
+    "main": "dist/index.js",
     "bin": {
         "cocos": "./dist/cli.js"
     },
@@ -82,8 +82,8 @@
         "draco3dgltf": "^1.5.7",
         "ejs": "^2.7.1",
         "express": "^5.1.0",
+        "fastmcp": "^3.17.0",
         "fs-extra": "^10.0.0",
-        "get-audio-duration": "^4.0.1",
         "get-video-duration": "^4.1.0",
         "gl": "^8.1.6",
         "globby": "^14.1.0",
