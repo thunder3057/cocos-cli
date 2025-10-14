@@ -67,8 +67,9 @@ export const RenderTextureHandler: AssetHandler = {
             // @ts-ignore renderTexture._wrapT
             fillUserdata(asset, 'wrapModeT', getWrapModeString(renderTexture._wrapT));
 
-            renderTexture.resize(asset.userData.width, asset.userData.height);
-            applyTextureBaseAssetUserData(asset.userData as TextureBaseAssetUserData, renderTexture);
+            const userData = asset.userData as RenderTextureAssetUserData;
+            renderTexture.resize(userData.width, userData.height);
+            applyTextureBaseAssetUserData(userData, renderTexture);
 
             const serializeJSON = EditorExtends.serialize(renderTexture);
             await asset.saveToLibrary('.json', serializeJSON);

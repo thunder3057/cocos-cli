@@ -9,10 +9,7 @@ import * as cc from 'cc';
 
 import { getDependUUIDList } from '../utils';
 import { AssetHandler } from '../../@types/protected';
-
-interface IAnimationUserData {
-    name: string;
-}
+import { AnimationClipAssetUserData } from '../../@types/userDatas';
 
 const AnimationHandler: AssetHandler = {
     // Handler 的名字，用于指定 Handler as 等
@@ -41,7 +38,7 @@ const AnimationHandler: AssetHandler = {
          * @param asset
          */
         async force(asset: Asset) {
-            const userData = asset.userData as IAnimationUserData;
+            const userData = asset.userData as AnimationClipAssetUserData;
             return userData.name !== asset.basename;
         },
 
@@ -55,7 +52,7 @@ const AnimationHandler: AssetHandler = {
          * @param asset
          */
         async import(asset: Asset) {
-            const userData = asset.userData as IAnimationUserData;
+            const userData = asset.userData as AnimationClipAssetUserData;
             try {
                 const fileContent = await readFile(asset.source, 'utf8');
                 const json = JSON.parse(fileContent);
