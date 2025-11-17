@@ -42,11 +42,12 @@ describe('MCP Scene API', () => {
             expect(result.data).toBeDefined();
             expect(result.data).not.toBeNull();
 
-            if (result.data) {
-                expect(result.data.assetUrl).toBe(testSceneUrl);
-                expect(result.data.assetName).toBe('scene-2d.scene');
-                expect(result.data.assetType).toBe('cc.SceneAsset');
-                expect(result.data.assetUuid).toBeDefined();
+            const data = result.data as { assetUrl: string, assetName: string, assetType: string, assetUuid: string };
+            if (data) {
+                expect(data.assetUrl).toBe(testSceneUrl);
+                expect(data.assetName).toBe('scene-2d.scene');
+                expect(data.assetType).toBe('cc.SceneAsset');
+                expect(data.assetUuid).toBeDefined();
                 expect(result.data.name).toBeDefined();
                 expect(result.data.children).toBeDefined();
                 expect(result.data.components).toBeDefined();
@@ -62,12 +63,12 @@ describe('MCP Scene API', () => {
 
             expect(result.code).toBe(200);
             expect(result.data).toBeDefined();
-
-            if (result.data) {
-                expect(result.data.assetUrl).toBe(testSceneUrl);
-                expect(result.data.assetName).toBe('scene-2d.scene');
-                expect(result.data.assetType).toBe('cc.SceneAsset');
-                expect(result.data.assetUuid).toBeDefined();
+            const data = result.data as { assetUrl: string, assetName: string, assetType: string, assetUuid: string };
+            if (data) {
+                expect(data.assetUrl).toBe(testSceneUrl);
+                expect(data.assetName).toBe('scene-2d.scene');
+                expect(data.assetType).toBe('cc.SceneAsset');
+                expect(data.assetUuid).toBeDefined();
                 expect(result.data.name).toBeDefined();
                 expect(result.data.children).toBeDefined();
                 expect(result.data.components).toBeDefined();
@@ -81,7 +82,7 @@ describe('MCP Scene API', () => {
             });
 
             if (openResult.code === 200 && openResult.data) {
-                const uuid = openResult.data.assetUuid;
+                const uuid = (openResult.data as { assetUuid: string }).assetUuid;
 
                 // 关闭场景
                 await context.mcpClient.callTool('scene-close', {});
@@ -94,9 +95,10 @@ describe('MCP Scene API', () => {
                 expect(result.code).toBe(200);
                 expect(result.data).toBeDefined();
 
-                if (result.data) {
-                    expect(result.data.assetUuid).toBe(uuid);
-                    expect(result.data.assetUrl).toBe(testSceneUrl);
+                const data = result.data as { assetUrl: string, assetUuid: string };
+                if (data) {
+                    expect(data.assetUuid).toBe(uuid);
+                    expect(data.assetUrl).toBe(testSceneUrl);
                 }
             }
         });
@@ -326,18 +328,8 @@ describe('MCP Scene API', () => {
             // 重新加载场景
             const result = await context.mcpClient.callTool('scene-reload', {});
 
+            expect(result.data).toBe(true);
             expect(result.code).toBe(200);
-            expect(result.data).toBeDefined();
-
-            if (result.data) {
-                expect(result.data.assetUrl).toBe(testSceneUrl);
-                expect(result.data.assetName).toBe('scene-2d.scene');
-                expect(result.data.assetType).toBe('cc.SceneAsset');
-                expect(result.data.assetUuid).toBeDefined();
-                expect(result.data.name).toBeDefined();
-                expect(result.data.children).toBeDefined();
-                expect(result.data.components).toBeDefined();
-            }
         });
 
         test('should handle reloading when no scene is open', async () => {
@@ -348,8 +340,8 @@ describe('MCP Scene API', () => {
             const result = await context.mcpClient.callTool('scene-reload', {});
 
             // 应该失败或返回适当的错误
-            expect(result.code).not.toBe(200);
-            expect(result.reason).toBeDefined();
+            expect(result.data).toBe(false);
+            expect(result.code).toBe(200);
         });
     });
 
@@ -384,7 +376,8 @@ describe('MCP Scene API', () => {
                 const queryResult = await context.mcpClient.callTool('scene-query-current', {});
                 expect(queryResult.code).toBe(200);
                 expect(queryResult.data).not.toBeNull();
-                expect(queryResult.data?.assetUrl).toBe(sceneUrl);
+                const data = queryResult.data as { assetUrl: string };
+                expect(data?.assetUrl).toBe(sceneUrl);
 
                 // 4. 保存场景
                 const saveResult = await context.mcpClient.callTool('scene-save', {});
@@ -393,8 +386,8 @@ describe('MCP Scene API', () => {
 
                 // 5. 重新加载场景
                 const reloadResult = await context.mcpClient.callTool('scene-reload', {});
+                expect(reloadResult.data).toBe(true);
                 expect(reloadResult.code).toBe(200);
-                expect(reloadResult.data).toBeDefined();
 
                 // 6. 关闭场景
                 const closeResult = await context.mcpClient.callTool('scene-close', {});
@@ -441,7 +434,8 @@ describe('MCP Scene API', () => {
                 });
 
                 let queryResult = await context.mcpClient.callTool('scene-query-current', {});
-                expect(queryResult.data?.assetUrl).toBe(scene1Url);
+                let data = queryResult.data as { assetUrl: string };
+                expect(data?.assetUrl).toBe(scene1Url);
 
                 // 切换到第二个场景
                 await context.mcpClient.callTool('scene-open', {
@@ -449,7 +443,8 @@ describe('MCP Scene API', () => {
                 });
 
                 queryResult = await context.mcpClient.callTool('scene-query-current', {});
-                expect(queryResult.data?.assetUrl).toBe(scene2Url);
+                data = queryResult.data as { assetUrl: string };
+                expect(data?.assetUrl).toBe(scene2Url);
 
                 // 关闭当前场景
                 await context.mcpClient.callTool('scene-close', {});

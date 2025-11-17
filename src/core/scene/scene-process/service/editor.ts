@@ -22,6 +22,9 @@ import { IAssetInfo } from '../../../assets/@types/public';
  */
 @register('Editor')
 export class EditorService extends BaseService<IEditorEvents> implements IEditorService {
+    private needReloadAgain: IReloadOptions | null = null;
+    private lastSceneOrNode: IScene | INode | undefined;
+    private reloadPromise: Promise<IScene | INode> | null = null;
     private currentEditorUuid: string | null = null; // 当前打开的编辑器 UUID
     private editorMap: Map<string, SceneEditor | PrefabEditor> = new Map(); // uuid -> editor
 
@@ -36,6 +39,13 @@ export class EditorService extends BaseService<IEditorEvents> implements IEditor
             return 'prefab';
         }
         return 'unknown';
+    }
+
+    /**
+     * 是否打开场景
+     */
+    public async hasOpen(): Promise<boolean> {
+        return this.isOpen;
     }
 
     /**
@@ -98,6 +108,7 @@ export class EditorService extends BaseService<IEditorEvents> implements IEditor
         const encode = await editor.open(assetInfo);
 
         this.emit('editor:open');
+        this.isOpen = true;
         console.log(`打开 ${assetInfo.url}`);
         return encode;
     }
@@ -127,7 +138,7 @@ export class EditorService extends BaseService<IEditorEvents> implements IEditor
             this.editorMap.delete(uuid);
 
             this.emit('editor:close');
-
+            this.isOpen = false;
             console.log(`关闭 ${assetInfo.url}`);
             return result;
         } catch (error) {
@@ -166,34 +177,44 @@ export class EditorService extends BaseService<IEditorEvents> implements IEditor
         }
     }
 
-    async reload(params: IReloadOptions): Promise<IScene | INode> {
+    async reload(params: IReloadOptions): Promise<boolean> {
+        if (this.reloadPromise) {
+            this.needReloadAgain = params;
+            return false;
+        }
         const urlOrUUID = params.urlOrUUID ?? this.currentEditorUuid;
+        if (!urlOrUUID) {
+            console.warn('当前没有打开任何编辑器');
+            return false;
+        }
+
+        const assetInfo = await Rpc.getInstance().request('assetManager', 'queryAssetInfo', [urlOrUUID]);
+        if (!assetInfo) {
+            console.warn(`通过 ${urlOrUUID} 请求资源失败`);
+            return false;
+        }
+
+        const editor = this.editorMap.get(assetInfo.uuid);
+        if (!editor) {
+            console.warn(`当前没有打开任何编辑器`);
+            return false;
+        }
+
         try {
-            if (!urlOrUUID) {
-                throw new Error('当前没有打开任何编辑器');
-            }
+            await editor.reload();
 
-            const assetInfo = await Rpc.getInstance().request('assetManager', 'queryAssetInfo', [urlOrUUID]);
-            if (!assetInfo) {
-                throw new Error(`通过 ${urlOrUUID} 请求资源失败`);
+            if (this.needReloadAgain) {
+                this.reload(this.needReloadAgain);
+                this.needReloadAgain = null;
             }
-
-            const uuid = assetInfo.uuid;
-            const editor = this.editorMap.get(uuid);
-            if (!editor) {
-                throw new Error(`当前没有打开任何编辑器`);
-            }
-
-            const result = await editor.reload();
 
             this.emit('editor:reload');
             this.broadcast('editor:reload');
-
             console.log(`重载 ${assetInfo.url}`);
-            return result;
+            return true;
         } catch (error) {
-            console.error(`重载失败: [${urlOrUUID}]`, error);
-            throw error;
+            console.error(error);
+            return false;
         }
     }
 

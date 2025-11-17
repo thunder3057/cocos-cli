@@ -67,13 +67,18 @@ export interface IEditorService extends IServiceEvents {
      * 重载资产
      * @param params
      */
-    reload(params: IReloadOptions): Promise<TEditorEntity>;
+    reload(params: IReloadOptions): Promise<boolean>;
 
     /**
      * 创建新资产
      * @param params
      */
     create(params: ICreateOptions): Promise<IBaseIdentifier>;
+
+    /**
+     * 是否有打开编辑器
+     */
+    hasOpen(): Promise<boolean>;
 
     /**
      * 获取当前打开的资产

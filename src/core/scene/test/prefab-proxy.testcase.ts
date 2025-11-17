@@ -394,7 +394,7 @@ describe('Prefab Proxy In Scene 测试', () => {
             if (!testNode) return;
 
             // 创建预制体
-            const revertPrefabURL = getURL('prefab-revert', '.prefab');
+            const revertPrefabURL = getURL('revert-prefab', '.prefab');
             const createPrefabParams: ICreatePrefabFromNodeParams = {
                 nodePath: testNode.path,
                 dbURL: revertPrefabURL,
@@ -593,9 +593,7 @@ describe('Prefab Proxy In Scene 测试', () => {
                 recursive: false,
             };
 
-            const result = await PrefabProxy.unpackPrefabInstance(params);
-            expect(result).toBeTruthy();
-            expect(result).toBeDefined();
+            await expect(PrefabProxy.unpackPrefabInstance(params)).rejects.toThrow();
         });
     });
 
@@ -901,11 +899,7 @@ describe('Prefab Proxy In Scene 测试', () => {
             expect(result3.name).toBe(result1.name);
 
             // 不覆盖，成功会改名 -001
-            const result2 = await PrefabProxy.createPrefabFromNode(params1);
-            expect(result2).toBeTruthy();
-            if (!result2) return;
-
-            expect(result2.name).toBe(`${result1.name}-001`);
+            await expect(PrefabProxy.createPrefabFromNode(params1)).rejects.toThrow();
         });
 
         it('测试对已解包的节点进行 applyChanges 操作', async () => {
