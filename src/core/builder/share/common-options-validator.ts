@@ -225,7 +225,7 @@ export const commonOptionConfigs: Record<string, IBuilderConfigItem> = {
     },
     sourceMaps: {
         label: 'i18n:builder.options.sourceMap',
-        default: 'false',
+        default: 'inline',
         description: 'i18n:builder.options.sourceMapTips',
         type: 'enum',
         items: [{
@@ -274,7 +274,7 @@ export const commonOptionConfigs: Record<string, IBuilderConfigItem> = {
     debug: {
         label: 'i18n:builder.options.debug',
         description: 'i18n:builder.options.debugTips',
-        default: false,
+        default: true,
         type: 'boolean',
     },
     mangleProperties: {
