@@ -3,6 +3,8 @@ import { join, relative, basename } from 'path';
 import utils from '../../../base/utils';
 import builderConfig from '../../share/builder-config';
 import { getBuildUrlPath, registerBuildPath } from '../../build.middleware';
+import { openUrlAsync, connectToChromeDevTools } from './utils-browser';
+
 
 export async function getPreviewUrl(dest: string, platform?: string) {
     const rawPath = utils.Path.resolveToRaw(dest);
@@ -33,38 +35,14 @@ export async function run(platform: string, dest: string) {
     const url = await getPreviewUrl(dest, platform);
     // 打开浏览器
     try {
-        const { exec } = require('child_process');
-        const platform = process.platform;
+        const remoteDebuggingMode = true;
+        const port = 9222;
+        await openUrlAsync(url, { remoteDebuggingMode, port });
 
-        let command: string;
-        switch (platform) {
-            case 'win32':
-                command = `start ${url}`;
-                break;
-            case 'darwin':
-                command = `open ${url}`;
-                break;
-            case 'linux':
-                command = `xdg-open ${url}`;
-                break;
-            default:
-                console.log(`请手动打开浏览器访问: ${url}`);
-                return url;
+        // 如果启用了远程调试模式，连接并监听浏览器日志
+        if (remoteDebuggingMode) {
+            await connectToChromeDevTools(port, url);
         }
-        //@ts-expect-error
-        //hack: when run on pink use simple browser instead of default browser
-        if(process && process.addGlobalOpenUrl) {
-            //@ts-expect-error
-            return process.addGlobalOpenUrl(url);
-        }
-        exec(command, (error: any) => {
-            if (error) {
-                console.error('打开浏览器失败:', error.message);
-                console.log(`请手动打开浏览器访问: ${url}`);
-            } else {
-                console.log(`正在浏览器中打开: ${url}`);
-            }
-        });
     } catch (error) {
         console.error('打开浏览器时发生错误:', error);
         console.log(`请手动打开浏览器访问: ${url}`);
