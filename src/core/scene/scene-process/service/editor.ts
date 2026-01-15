@@ -75,6 +75,12 @@ export class EditorService extends BaseService<IEditorEvents> implements IEditor
         return editor ? editor.getRootNode() : null;
     }
 
+    async waitReloading(): Promise<void> {
+        if (this.reloadPromise) {
+            await this.reloadPromise;
+        }
+    }
+
     async open(params: IOpenOptions): Promise<IScene | INode> {
         const { urlOrUUID } = params;
 
@@ -226,7 +232,8 @@ export class EditorService extends BaseService<IEditorEvents> implements IEditor
         }
 
         try {
-            await editor.reload();
+            this.reloadPromise = editor.reload() as Promise<IScene | INode>;
+            await this.reloadPromise;
 
             if (this.needReloadAgain) {
                 this.reload(this.needReloadAgain);
@@ -240,6 +247,8 @@ export class EditorService extends BaseService<IEditorEvents> implements IEditor
         } catch (error) {
             console.error(error);
             return false;
+        } finally {
+            this.reloadPromise = null;
         }
     }
 
